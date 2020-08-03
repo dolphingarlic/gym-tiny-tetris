@@ -1,3 +1,4 @@
+from importlib.resources import open_text
 import random
 import sys
 
@@ -76,8 +77,7 @@ class TinyTetrisEnv(gym.Env):
 
     def load_data(self, use_input):
         self.piece_ptr = 0
-        with open(f'./input/tiny.i{use_input}', 'r') as fin:
-            self.piece_queue = list(map(int, fin.readlines()[1:]))
+        self.piece_list = list(map(int, open_text('envs.input', f'./input/tiny.i{use_input}').readlines()[1:]))
 
     def _can_place(self, type, column):
         """Given the piece type and column, determines whether it's valid."""
@@ -174,6 +174,6 @@ class TinyTetrisEnv(gym.Env):
     def _get_next_piece(self):
         """Gets the next piece."""
         self.piece_ptr += 1
-        if self.piece_ptr == len(self.piece_queue):
+        if self.piece_ptr == len(self.piece_list):
             self.piece_ptr = 0
-        return self.piece_queue[self.piece_ptr - 1] - 1
+        return self.piece_list[self.piece_ptr - 1] - 1
