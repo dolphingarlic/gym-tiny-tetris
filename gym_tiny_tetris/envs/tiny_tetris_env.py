@@ -13,6 +13,7 @@ class TinyTetrisEnv(gym.Env):
         self.seed = seed
         if seed is None:
             self.seed = random.randint(0, sys.maxsize)
+        self.load_data(random.randint(1, 5))
 
         self.action_space = spaces.Discrete(9)
         self.observation_space = spaces.Box(
@@ -22,16 +23,8 @@ class TinyTetrisEnv(gym.Env):
             dtype=int)
         self.reset()
 
-    def reset(self, use_input=-1):
+    def reset(self):
         """Clears the board and sets the random seed."""
-        if use_input == -1:
-            self.piece_queue = None
-            random.seed(self.seed)
-        else:
-            self.piece_ptr = 0
-            with open(f'input/tiny.i{use_input}', 'r') as fin:
-                self.piece_queue = list(map(int, fin.readlines()[1:]))
-
         self.score = 0
         self.board = [[0 for i in range(9)] for j in range(9)]
 
@@ -80,6 +73,11 @@ class TinyTetrisEnv(gym.Env):
         reward = self._place_piece(self.next_piece, action)
 
         return self._get_state(), reward, False, {}
+
+    def load_data(self, use_input):
+        self.piece_ptr = 0
+        with open(f'input/tiny.i{use_input}', 'r') as fin:
+            self.piece_queue = list(map(int, fin.readlines()[1:]))
 
     def _can_place(self, type, column):
         """Given the piece type and column, determines whether it's valid."""
@@ -175,7 +173,7 @@ class TinyTetrisEnv(gym.Env):
 
     def _get_next_piece(self):
         """Gets the next piece."""
-        if self.piece_queue is None:
-            return random.randint(0, 8)
         self.piece_ptr += 1
+        if self.piece_ptr == len(self.piece_queue):
+            self.piece_ptr = 0
         return self.piece_queue[self.piece_ptr - 1] - 1
