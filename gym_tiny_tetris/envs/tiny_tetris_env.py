@@ -33,9 +33,10 @@ class TinyTetrisEnv(gym.Env):
 
     def render(self, mode='human', close=False):
         """Just prints the current game board."""
+        print(f'Score: {self.score}')
         for row in self.board:
             print(''.join(map(str, row)))
-        print(f'Score: {self.score}')
+        print()
 
     def step(self, action):
         """
@@ -65,12 +66,12 @@ class TinyTetrisEnv(gym.Env):
             
         # End the game if we can't place the piece
         if not self._can_place(self.next_piece, action):
-            return self._get_state(), -200, True, {}
+            return self._get_state(), 0, True, {}
 
         # Place the piece
-        self._place_piece(self.next_piece, action)
+        reward = self._place_piece(self.next_piece, action)
 
-        return self._get_state(), 1, False, {}
+        return self._get_state(), reward, False, {}
 
     def _can_place(self, type, column):
         """Given the piece type and column, determines whether it's valid."""
@@ -95,6 +96,8 @@ class TinyTetrisEnv(gym.Env):
 
     def _place_piece(self, type, column):
         """Places the piece in the given column."""
+        reward = 1
+        
         if type == 0:
             for i in range(9):
                 if i == 8 or self.board[i + 1][column]:
@@ -145,10 +148,13 @@ class TinyTetrisEnv(gym.Env):
         self.board = list(filter(lambda row: 0 in row, self.board))
         while len(self.board) != 9:
             self.board.insert(0, [0 for i in range(9)])
+            reward += 10
         
         # Next piece
         self.next_piece = random.randint(0, 8)
         self.score += 1
+
+        return reward
 
     def _get_state(self):
         """
