@@ -76,7 +76,7 @@ class TinyTetrisEnv(gym.Env):
 
     def load_data(self, use_input):
         self.piece_ptr = 0
-        with open(f'input/tiny.i{use_input}', 'r') as fin:
+        with open(f'./input/tiny.i{use_input}', 'r') as fin:
             self.piece_queue = list(map(int, fin.readlines()[1:]))
 
     def _can_place(self, type, column):
