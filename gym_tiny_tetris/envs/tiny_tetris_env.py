@@ -22,13 +22,21 @@ class TinyTetrisEnv(gym.Env):
             dtype=int)
         self.reset()
 
-    def reset(self):
+    def reset(self, use_input=-1):
         """Clears the board and sets the random seed."""
-        random.seed(self.seed)
+        if use_input == -1:
+            self.piece_queue = None
+            random.seed(self.seed)
+        else:
+            self.piece_ptr = 0
+            with open(f'input/tiny.i{use_input}', 'r') as fin:
+                self.piece_queue = list(map(int, fin.readlines()[1:]))
+
         self.score = 0
         self.board = [[0 for i in range(9)] for j in range(9)]
+
         # N.B. The piece types are 0-indexed
-        self.next_piece = random.randint(0, 8)
+        self.next_piece = self._get_next_piece()
         return self._get_state()
 
     def render(self, mode='human', close=False):
@@ -151,7 +159,7 @@ class TinyTetrisEnv(gym.Env):
             reward += 50
         
         # Next piece
-        self.next_piece = random.randint(0, 8)
+        self.next_piece = self._get_next_piece()
         self.score += 1
 
         return reward
@@ -164,3 +172,10 @@ class TinyTetrisEnv(gym.Env):
         piece_arr = [0 for i in range(9)]
         piece_arr[self.next_piece] = 1
         return np.vstack([self.board, piece_arr])
+
+    def _get_next_piece(self):
+        """Gets the next piece."""
+        if self.piece_queue is None:
+            return random.randint(0, 8)
+        self.piece_ptr += 1
+        return self.piece_queue[self.piece_ptr - 1] - 1
