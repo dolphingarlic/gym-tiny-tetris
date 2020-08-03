@@ -1,0 +1,1 @@
+from gym_tiny_tetris.envs.tiny_tetris_env import TinyTetrisEnv
