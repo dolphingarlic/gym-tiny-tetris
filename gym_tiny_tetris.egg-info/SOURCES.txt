@@ -1,6 +1,0 @@
-setup.py
-gym_tiny_tetris.egg-info/PKG-INFO
-gym_tiny_tetris.egg-info/SOURCES.txt
-gym_tiny_tetris.egg-info/dependency_links.txt
-gym_tiny_tetris.egg-info/requires.txt
-gym_tiny_tetris.egg-info/top_level.txt
