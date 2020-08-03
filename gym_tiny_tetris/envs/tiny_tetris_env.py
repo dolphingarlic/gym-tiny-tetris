@@ -1,4 +1,8 @@
-from importlib.resources import open_text
+try:
+    from importlib.resources import open_text
+except ImportError:
+    # Try backported to PY<37 `importlib_resources`.
+    from importlib_resources import open_text
 import random
 import sys
 
