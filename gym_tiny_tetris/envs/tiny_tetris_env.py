@@ -66,7 +66,7 @@ class TinyTetrisEnv(gym.Env):
             
         # End the game if we can't place the piece
         if not self._can_place(self.next_piece, action):
-            return self._get_state(), 0, True, {}
+            return self._get_state(), -10, True, {}
 
         # Place the piece
         reward = self._place_piece(self.next_piece, action)
@@ -148,7 +148,7 @@ class TinyTetrisEnv(gym.Env):
         self.board = list(filter(lambda row: 0 in row, self.board))
         while len(self.board) != 9:
             self.board.insert(0, [0 for i in range(9)])
-            reward += 10
+            reward += 50
         
         # Next piece
         self.next_piece = random.randint(0, 8)
