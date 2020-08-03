@@ -10,6 +10,8 @@ import gym
 from gym import error, spaces, utils
 import numpy as np
 
+from . import inp
+
 class TinyTetrisEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
@@ -81,7 +83,7 @@ class TinyTetrisEnv(gym.Env):
 
     def load_data(self, use_input):
         self.piece_ptr = 0
-        self.piece_list = list(map(int, open_text('input', f'tiny.i{use_input}').readlines()[1:]))
+        self.piece_list = list(map(int, open_text(inp, f'tiny.i{use_input}').readlines()[1:]))
 
     def _can_place(self, type, column):
         """Given the piece type and column, determines whether it's valid."""
