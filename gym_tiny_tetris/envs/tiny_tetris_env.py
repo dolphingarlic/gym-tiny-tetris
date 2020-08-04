@@ -12,15 +12,15 @@ import numpy as np
 
 from . import inp
 
+
 class TinyTetrisEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, seed=None):
+    def __init__(self, use_file=1):
         """Initializes the environment and the random seed."""
-        self.seed = seed
-        if seed is None:
-            self.seed = random.randint(0, sys.maxsize)
-        self.load_data(random.randint(1, 5))
+        self.piece_ptr = 0
+        self.piece_list = list(
+            map(int, open_text(inp, f'tiny.i{use_input}').readlines()[1:]))
 
         self.action_space = spaces.Discrete(9)
         self.observation_space = spaces.Box(
@@ -36,6 +36,7 @@ class TinyTetrisEnv(gym.Env):
         self.board = [[0 for i in range(9)] for j in range(9)]
 
         # N.B. The piece types are 0-indexed
+        self.piece_ptr = 0
         self.next_piece = self._get_next_piece()
         return self._get_state()
 
@@ -71,7 +72,7 @@ class TinyTetrisEnv(gym.Env):
         # Test whether action is valid
         if action < 0 or action > 8:
             raise Exception(f'Invalid action: {action}')
-            
+
         # End the game if we can't place the piece
         if not self._can_place(self.next_piece, action):
             return self._get_state(), -10, True, {}
@@ -79,11 +80,7 @@ class TinyTetrisEnv(gym.Env):
         # Place the piece
         reward = self._place_piece(self.next_piece, action)
 
-        return self._get_state(), reward, False, {}
-
-    def load_data(self, use_input):
-        self.piece_ptr = 0
-        self.piece_list = list(map(int, open_text(inp, f'tiny.i{use_input}').readlines()[1:]))
+        return self._get_state(), reward, reward < 1e5, {}
 
     def _can_place(self, type, column):
         """Given the piece type and column, determines whether it's valid."""
@@ -109,7 +106,7 @@ class TinyTetrisEnv(gym.Env):
     def _place_piece(self, type, column):
         """Places the piece in the given column."""
         reward = 1
-        
+
         if type == 0:
             for i in range(9):
                 if i == 8 or self.board[i + 1][column]:
@@ -128,42 +125,50 @@ class TinyTetrisEnv(gym.Env):
         elif type == 3:
             for i in range(2, 9):
                 if i == 8 or self.board[i + 1][column]:
-                    self.board[i][column] = self.board[i - 1][column] = self.board[i - 2][column] = 1
+                    self.board[i][column] = self.board[i -
+                                                       1][column] = self.board[i - 2][column] = 1
                     break
         elif type == 4:
             for i in range(9):
                 if i == 8 or self.board[i + 1][column] or self.board[i + 1][column + 1] or self.board[i + 1][column + 2]:
-                    self.board[i][column] = self.board[i][column + 1] = self.board[i][column + 2] = 1
+                    self.board[i][column] = self.board[i][column +
+                                                          1] = self.board[i][column + 2] = 1
                     break
         elif type == 5:
             for i in range(1, 9):
                 if i == 8 or self.board[i + 1][column] or self.board[i + 1][column + 1]:
-                    self.board[i][column] = self.board[i][column + 1] = self.board[i - 1][column] = 1
+                    self.board[i][column] = self.board[i][column +
+                                                          1] = self.board[i - 1][column] = 1
                     break
         elif type == 6:
             for i in range(1, 9):
                 if i == 8 or self.board[i + 1][column] or self.board[i + 1][column + 1]:
-                    self.board[i][column] = self.board[i][column + 1] = self.board[i - 1][column + 1] = 1
+                    self.board[i][column] = self.board[i][column +
+                                                          1] = self.board[i - 1][column + 1] = 1
                     break
         elif type == 7:
             for i in range(1, 9):
                 if i == 8 or self.board[i + 1][column] or self.board[i][column + 1]:
-                    self.board[i][column] = self.board[i - 1][column] = self.board[i - 1][column + 1] = 1
+                    self.board[i][column] = self.board[i -
+                                                       1][column] = self.board[i - 1][column + 1] = 1
                     break
         elif type == 8:
             for i in range(1, 9):
                 if i == 8 or self.board[i][column] or self.board[i + 1][column + 1]:
-                    self.board[i - 1][column] = self.board[i][column + 1] = self.board[i - 1][column + 1] = 1
+                    self.board[i - 1][column] = self.board[i][column +
+                                                              1] = self.board[i - 1][column + 1] = 1
                     break
-        
+
         # Erase cleared lines
         self.board = list(filter(lambda row: 0 in row, self.board))
         while len(self.board) != 9:
             self.board.insert(0, [0 for i in range(9)])
             reward += 50
-        
+
         # Next piece
         self.next_piece = self._get_next_piece()
+        if self.piece_ptr == len(self.piece_list):
+            reward += 1e5
         self.score += 1
 
         return reward
