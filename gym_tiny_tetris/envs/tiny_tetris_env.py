@@ -20,7 +20,7 @@ class TinyTetrisEnv(gym.Env):
         """Initializes the environment and the random seed."""
         self.piece_ptr = 0
         self.piece_list = list(
-            map(int, open_text(inp, f'tiny.i{use_input}').readlines()[1:]))
+            map(int, open_text(inp, f'tiny.i{use_file}').readlines()[1:]))
 
         self.action_space = spaces.Discrete(9)
         self.observation_space = spaces.Box(
