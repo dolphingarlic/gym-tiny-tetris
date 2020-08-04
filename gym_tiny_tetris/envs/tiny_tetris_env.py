@@ -185,6 +185,4 @@ class TinyTetrisEnv(gym.Env):
     def _get_next_piece(self):
         """Gets the next piece."""
         self.piece_ptr += 1
-        if self.piece_ptr == len(self.piece_list):
-            self.piece_ptr = 0
         return self.piece_list[self.piece_ptr - 1] - 1
