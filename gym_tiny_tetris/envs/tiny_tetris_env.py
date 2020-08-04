@@ -80,7 +80,7 @@ class TinyTetrisEnv(gym.Env):
         # Place the piece
         reward = self._place_piece(self.next_piece, action)
 
-        return self._get_state(), reward, reward < 1e5, {}
+        return self._get_state(), reward, reward > 1e5, {}
 
     def _can_place(self, type, column):
         """Given the piece type and column, determines whether it's valid."""
